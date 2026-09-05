@@ -13,7 +13,7 @@ if (!$usuarioId) {
 $dados = json_decode(file_get_contents('php://input'), true) ?? [];
 $acao = $dados['acao'] ?? 'enviar'; // 'enviar' ou 'rascunho'
 
-$camposObrigatorios = ['assunto', 'setor_destino_id', 'prazo', 'tipo', 'prioridade', 'urgencia'];
+$camposObrigatorios = ['assunto', 'setor_destino_id', 'prazo', 'tipo'];
 foreach ($camposObrigatorios as $campo) {
     if (empty($dados[$campo])) {
         echo json_encode(['sucesso' => false, 'mensagem' => "Campo obrigatorio ausente: {$campo}"]);
@@ -41,8 +41,8 @@ try {
         $dados['observacoes'] ?? null,
         $setorOrigemId,
         $dados['setor_destino_id'],
-        $dados['prioridade'],
-        $dados['urgencia'],
+        'normal', // prioridade inicial neutra - quem recebe classifica de verdade
+        'nao_urgente', // urgencia inicial neutra - quem recebe classifica de verdade
         $dados['prazo'],
         $dados['prazo'],
         $dados['prazo_resposta'] ?: null,

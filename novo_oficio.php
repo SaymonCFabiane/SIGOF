@@ -75,7 +75,7 @@ $tipoPreSelecionado = $_GET['tipo'] ?? 'oficio';
         <input type="text" name="anexos" placeholder="Ex: oficio_123.pdf, planilha_custos.xlsx" class="w-full border rounded-lg px-3 py-2">
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
             <label class="block text-sm font-medium mb-1">Prazo</label>
             <input type="date" name="prazo" required class="w-full border rounded-lg px-3 py-2">
@@ -84,24 +84,9 @@ $tipoPreSelecionado = $_GET['tipo'] ?? 'oficio';
             <label class="block text-sm font-medium mb-1">Prazo de resposta (opcional)</label>
             <input type="date" name="prazo_resposta" class="w-full border rounded-lg px-3 py-2">
         </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Prioridade</label>
-            <select name="prioridade" class="w-full border rounded-lg px-3 py-2">
-                <option value="baixa">Baixa</option>
-                <option value="normal" selected>Normal</option>
-                <option value="alta">Alta</option>
-                <option value="critica">Critica</option>
-            </select>
-        </div>
     </div>
 
-    <div>
-        <label class="block text-sm font-medium mb-1">Urgencia</label>
-        <select name="urgencia" class="w-full border rounded-lg px-3 py-2 max-w-xs">
-            <option value="nao_urgente" selected>Nao Urgente</option>
-            <option value="urgente">Urgente</option>
-        </select>
-    </div>
+    <p class="text-xs text-slate-400 italic">Prioridade e urgencia nao sao definidas aqui &mdash; quem receber a demanda ira classifica-las no momento do recebimento.</p>
 
     <div>
         <label class="block text-sm font-medium mb-1">Observacoes (opcional)</label>

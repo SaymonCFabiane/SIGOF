@@ -18,7 +18,7 @@ formNovoOficio.addEventListener('submit', async (e) => {
     if (acaoClicada === 'enviar') {
         const tipoLabel = LABELS_TIPO[dados.tipo] || dados.tipo;
         const destinoLabel = formNovoOficio.querySelector('[name=setor_destino_id]').selectedOptions[0].text;
-        const resumo = `Revisar antes de enviar:\n\nTipo: ${tipoLabel}\nAssunto: ${dados.assunto}\nDestino: ${destinoLabel}\nPrazo: ${dados.prazo}\nPrioridade: ${dados.prioridade} / Urgencia: ${dados.urgencia}\n\nConfirma o envio?`;
+        const resumo = `Revisar antes de enviar:\n\nTipo: ${tipoLabel}\nAssunto: ${dados.assunto}\nDestino: ${destinoLabel}\nPrazo: ${dados.prazo}\n\nA prioridade e urgencia serao definidas por quem receber a demanda.\n\nConfirma o envio?`;
         if (!confirm(resumo)) {
             return;
         }

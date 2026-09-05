@@ -70,6 +70,31 @@
                 <div class="flex flex-wrap gap-2" id="acoes-status"></div>
             </div>
 
+            ${(status === 'enviada' && (permissoes.eh_do_setor_destino || permissoes.eh_plus)) ? `
+            <div class="bg-white border rounded-lg p-4 mb-4">
+                <h2 class="font-semibold text-sm mb-3">Confirmar recebimento e classificar</h2>
+                <p class="text-xs text-slate-500 mb-2">Quem recebe define a prioridade e a urgencia da demanda.</p>
+                <div class="flex gap-2 items-end flex-wrap">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Prioridade</label>
+                        <select id="select-prioridade-recebimento" class="border rounded px-2 py-1 text-sm">
+                            <option value="baixa">Baixa</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Critica</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Urgencia</label>
+                        <select id="select-urgencia-recebimento" class="border rounded px-2 py-1 text-sm">
+                            <option value="nao_urgente" selected>Nao Urgente</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <button id="btn-confirmar-recebimento" class="bg-blue-700 text-white text-xs px-3 py-2 rounded hover:bg-blue-800">Confirmar Recebimento</button>
+                </div>
+            </div>` : ''}
+
             ${(!finalizado && (status === 'recebida' || status === 'aguardando_responsavel') && permissoes.eh_do_setor_destino) ? `
             <div class="bg-white border rounded-lg p-4 mb-4">
                 <h2 class="font-semibold text-sm mb-3">Definir responsavel e colaboradores</h2>
@@ -174,7 +199,6 @@
         const acoes = [];
 
         if (status === 'rascunho') acoes.push(['enviar_rascunho', 'Enviar agora', 'bg-blue-700 hover:bg-blue-800']);
-        if (status === 'enviada') acoes.push(['receber', 'Marcar como recebida', 'bg-blue-700 hover:bg-blue-800']);
         if (status === 'aguardando_responsavel') acoes.push(['iniciar_analise', 'Iniciar analise', 'bg-cyan-700 hover:bg-cyan-800']);
         if (['em_analise', 'aguardando_responsavel', 'aguardando_informacao', 'reaberta'].includes(status)) acoes.push(['iniciar_andamento', 'Iniciar/Retomar andamento', 'bg-purple-700 hover:bg-purple-800']);
         if (['em_analise', 'em_andamento', 'aguardando_responsavel'].includes(status)) acoes.push(['solicitar_informacao', 'Solicitar informacao', 'bg-amber-600 hover:bg-amber-700']);
@@ -222,6 +246,15 @@
                 return executarAcao('atualizar_status.php', { oficio_id: oficioId, acao, observacao: '' });
             });
         });
+
+        const btnConfirmarRecebimento = document.getElementById('btn-confirmar-recebimento');
+        if (btnConfirmarRecebimento) {
+            btnConfirmarRecebimento.addEventListener('click', async () => {
+                const prioridade = document.getElementById('select-prioridade-recebimento').value;
+                const urgencia = document.getElementById('select-urgencia-recebimento').value;
+                return executarAcao('atualizar_status.php', { oficio_id: oficioId, acao: 'receber', prioridade, urgencia });
+            });
+        }
 
         const btnDefinirResponsavel = document.getElementById('btn-definir-responsavel');
         if (btnDefinirResponsavel) {

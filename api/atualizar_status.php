@@ -182,10 +182,44 @@ if ($acao === 'concluir') {
 }
 
 // ---------------------------------------------------------------
+// Recebimento (7.1 adaptado): quem recebe classifica prioridade e urgencia.
+// ---------------------------------------------------------------
+if ($acao === 'receber') {
+    if (!$ehDoSetorDestino && !$ehPlus) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Somente alguem do setor destino (ou PLUS) pode marcar como recebida.']);
+        exit;
+    }
+    if ($oficio['status'] !== 'enviada') {
+        echo json_encode(['sucesso' => false, 'mensagem' => "Nao e possivel receber a partir do status atual ({$oficio['status']})."]);
+        exit;
+    }
+    $prioridade = $dados['prioridade'] ?? '';
+    $urgencia = $dados['urgencia'] ?? '';
+    if (!in_array($prioridade, ['baixa', 'normal', 'alta', 'critica'], true) || !in_array($urgencia, ['urgente', 'nao_urgente'], true)) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Informe prioridade e urgencia para confirmar o recebimento.']);
+        exit;
+    }
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE oficios SET status = 'recebida', prioridade = ?, urgencia = ? WHERE id = ?")
+            ->execute([$prioridade, $urgencia, $oficioId]);
+        $descricao = "Recebido por {$autor['nome']}. Classificado como prioridade {$prioridade}" . ($urgencia === 'urgente' ? ', urgente.' : '.');
+        registrarEvento($pdo, $oficioId, 'status', 'Oficio recebido e classificado', $descricao, $usuarioId, 'status', 'enviada', 'recebida');
+        registrarNotificacao($pdo, $oficio['criado_por_id'], $oficioId, "Demanda \"{$oficio['assunto']}\" foi recebida e classificada.");
+        $pdo->commit();
+        echo json_encode(['sucesso' => true]);
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao receber: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+// ---------------------------------------------------------------
 // Demais transicoes simples de status
 // ---------------------------------------------------------------
 $acoesValidas = [
-    'receber'               => ['de' => ['enviada'], 'para' => 'recebida', 'titulo' => 'Oficio recebido'],
     'iniciar_analise'       => ['de' => ['aguardando_responsavel'], 'para' => 'em_analise', 'titulo' => 'Em analise'],
     'iniciar_andamento'     => ['de' => ['em_analise', 'aguardando_responsavel', 'aguardando_informacao', 'reaberta'], 'para' => 'em_andamento', 'titulo' => 'Em andamento'],
     'solicitar_informacao'  => ['de' => ['em_analise', 'em_andamento', 'aguardando_responsavel'], 'para' => 'aguardando_informacao', 'titulo' => 'Aguardando informacao'],
