@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/funcoes.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_id'])) {
     $_SESSION['usuario_atual_id'] = (int) $_POST['usuario_id'];
-    header('Location: oficios.php');
+    header('Location: dashboard.php');
     exit;
 }
 

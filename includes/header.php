@@ -24,16 +24,16 @@ if ($usuarioAtual) {
 <body class="bg-slate-50 min-h-screen text-slate-800">
     <header class="bg-blue-900 text-white shadow">
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
-            <a href="oficios.php" class="font-bold text-lg tracking-tight">SIGOF</a>
+            <a href="dashboard.php" class="font-bold text-lg tracking-tight">SIGOF</a>
             <nav class="flex items-center gap-4 text-sm flex-wrap">
-                <a href="oficios.php" class="hover:underline">Oficios</a>
-                <a href="novo_oficio.php" class="hover:underline">+ Novo Oficio</a>
                 <a href="busca.php" class="hover:underline">Buscar</a>
                 <a href="dashboard.php" class="hover:underline">Dashboard</a>
-                <a href="notificacoes.php" class="hover:underline relative">
-                    Notificacoes
+                <a href="oficios.php" class="hover:underline">Oficios</a>
+                <a href="novo_oficio.php" class="hover:underline">+ Novo Oficio</a>
+                <a href="notificacoes.php" class="hover:opacity-80 relative text-base leading-none" title="Notificacoes">
+                    🔔
                     <?php if ($naoLidas > 0): ?>
-                        <span class="absolute -top-2 -right-3 bg-red-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center"><?= $naoLidas > 9 ? '9+' : $naoLidas ?></span>
+                        <span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center"><?= $naoLidas > 9 ? '9+' : $naoLidas ?></span>
                     <?php endif; ?>
                 </a>
                 <?php if ($usuarioAtual): ?>
@@ -44,8 +44,8 @@ if ($usuarioAtual) {
                             &bull; PLUS <?= htmlspecialchars(ucfirst($usuarioAtual['nivel_plus'])) ?>
                         <?php endif; ?>
                         (<?= htmlspecialchars($usuarioAtual['secretaria_sigla']) ?>)
+                        <a href="index.php" class="underline text-blue-200 ml-1">trocar</a>
                     </span>
-                    <a href="index.php" class="text-xs underline text-blue-200">trocar</a>
                 <?php endif; ?>
             </nav>
         </div>
