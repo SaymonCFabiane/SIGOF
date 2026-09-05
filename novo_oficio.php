@@ -15,9 +15,10 @@ $setores = $pdo->query("
 $destinoPreSelecionado = (int) ($_GET['destino_setor'] ?? 0);
 $tipoPreSelecionado = $_GET['tipo'] ?? 'oficio';
 ?>
-<h1 class="text-xl font-bold text-slate-800 mb-6">+ Nova Demanda / Oficio</h1>
+<div class="max-w-2xl mx-auto">
+<h1 class="text-xl font-bold text-slate-800 mb-6 text-center">+ Nova Demanda / Oficio</h1>
 
-<form id="form-novo-oficio" class="bg-white border rounded-lg p-6 space-y-4 max-w-2xl">
+<form id="form-novo-oficio" class="bg-white border rounded-lg p-6 space-y-4">
     <div>
         <label class="block text-sm font-medium mb-1">Tipo de Demanda</label>
         <select name="tipo" id="campo-tipo" class="w-full border rounded-lg px-3 py-2">
@@ -100,6 +101,7 @@ $tipoPreSelecionado = $_GET['tipo'] ?? 'oficio';
         <button type="submit" data-acao="rascunho" class="bg-slate-200 text-slate-700 px-5 py-2 rounded-lg hover:bg-slate-300">Salvar como Rascunho</button>
     </div>
 </form>
+</div>
 
 <script src="assets/js/api.js"></script>
 <script src="assets/js/novo_oficio.js"></script>
