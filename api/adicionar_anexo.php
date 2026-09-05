@@ -2,6 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../includes/sessao.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/funcoes.php';
 
 $usuarioId = usuarioAtualId();
 if (!$usuarioId) {
@@ -18,7 +19,6 @@ if ($nomeArquivo === '') {
     exit;
 }
 
-$stmt = $pdo->prepare("INSERT INTO oficio_eventos (oficio_id, tipo_evento, titulo, descricao, autor_id) VALUES (?, 'anexo', 'Anexo adicionado', ?, ?)");
-$stmt->execute([$oficioId, $nomeArquivo, $usuarioId]);
+registrarEvento($pdo, $oficioId, 'anexo', 'Anexo adicionado', $nomeArquivo, $usuarioId);
 
 echo json_encode(['sucesso' => true]);

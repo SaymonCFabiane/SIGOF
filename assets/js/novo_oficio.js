@@ -1,9 +1,28 @@
-document.getElementById('form-novo-oficio').addEventListener('submit', async (e) => {
+const formNovoOficio = document.getElementById('form-novo-oficio');
+let acaoClicada = 'enviar';
+
+formNovoOficio.querySelectorAll('button[type=submit]').forEach(btn => {
+    btn.addEventListener('click', () => { acaoClicada = btn.dataset.acao; });
+});
+
+formNovoOficio.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const form = e.target;
-    const dados = Object.fromEntries(new FormData(form).entries());
     const erroEl = document.getElementById('mensagem-erro');
     erroEl.classList.add('hidden');
+
+    const formData = new FormData(formNovoOficio);
+    const dados = Object.fromEntries(formData.entries());
+    dados.setores_envolvidos = formData.getAll('setores_envolvidos[]');
+    dados.acao = acaoClicada;
+
+    if (acaoClicada === 'enviar') {
+        const tipoLabel = LABELS_TIPO[dados.tipo] || dados.tipo;
+        const destinoLabel = formNovoOficio.querySelector('[name=setor_destino_id]').selectedOptions[0].text;
+        const resumo = `Revisar antes de enviar:\n\nTipo: ${tipoLabel}\nAssunto: ${dados.assunto}\nDestino: ${destinoLabel}\nPrazo: ${dados.prazo}\nPrioridade: ${dados.prioridade} / Urgencia: ${dados.urgencia}\n\nConfirma o envio?`;
+        if (!confirm(resumo)) {
+            return;
+        }
+    }
 
     const resposta = await chamarApi('criar_oficio.php', dados, 'POST');
 

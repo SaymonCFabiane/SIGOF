@@ -2,6 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../includes/sessao.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/funcoes.php';
 
 $usuarioId = usuarioAtualId();
 if (!$usuarioId) {
@@ -10,6 +11,7 @@ if (!$usuarioId) {
 }
 
 $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+$acao = $dados['acao'] ?? 'enviar'; // 'enviar' ou 'rascunho'
 
 $camposObrigatorios = ['assunto', 'setor_destino_id', 'prazo', 'tipo', 'prioridade', 'urgencia'];
 foreach ($camposObrigatorios as $campo) {
@@ -19,39 +21,64 @@ foreach ($camposObrigatorios as $campo) {
     }
 }
 
-$stmt = $pdo->prepare("SELECT setor_id FROM usuarios_simulados WHERE id = ?");
-$stmt->execute([$usuarioId]);
-$setorOrigemId = $stmt->fetchColumn();
+$autor = carregarUsuarioAtual($pdo, $usuarioId);
+$setorOrigemId = $autor['setor_id'];
+$confidencial = ($dados['tipo'] === 'denuncia') ? 1 : 0;
+$statusInicial = $acao === 'rascunho' ? 'rascunho' : 'enviada';
 
 $pdo->beginTransaction();
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO oficios (numero_oficio, tipo, assunto, descricao, setor_origem_id, setor_destino_id, responsavel_atual_id, prioridade, urgencia, prazo, status, criado_por_id)
-        VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, 'enviada', ?)
+        INSERT INTO oficios (numero_oficio, tipo, confidencial, assunto, descricao, observacoes, setor_origem_id, setor_destino_id, responsavel_atual_id, prioridade, urgencia, prazo_original, prazo, prazo_resposta, status, criado_por_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?)
     ");
     $stmt->execute([
         $dados['numero_oficio'] ?: null,
         $dados['tipo'],
+        $confidencial,
         $dados['assunto'],
         $dados['descricao'] ?? null,
+        $dados['observacoes'] ?? null,
         $setorOrigemId,
         $dados['setor_destino_id'],
         $dados['prioridade'],
         $dados['urgencia'],
         $dados['prazo'],
+        $dados['prazo'],
+        $dados['prazo_resposta'] ?: null,
+        $statusInicial,
         $usuarioId,
     ]);
     $oficioId = $pdo->lastInsertId();
 
-    $stmtNome = $pdo->prepare("SELECT nome FROM usuarios_simulados WHERE id = ?");
-    $stmtNome->execute([$usuarioId]);
-    $nomeAutor = $stmtNome->fetchColumn();
+    // Setores adicionais envolvidos (destino multiplo / 5.2)
+    if (!empty($dados['setores_envolvidos']) && is_array($dados['setores_envolvidos'])) {
+        $stmtDest = $pdo->prepare("INSERT INTO oficio_destinatarios (oficio_id, setor_id) VALUES (?, ?)");
+        foreach ($dados['setores_envolvidos'] as $setorId) {
+            $setorId = (int) $setorId;
+            if ($setorId > 0 && $setorId !== (int) $dados['setor_destino_id']) {
+                $stmtDest->execute([$oficioId, $setorId]);
+            }
+        }
+    }
 
-    $stmtEvento = $pdo->prepare("
-        INSERT INTO oficio_eventos (oficio_id, tipo_evento, titulo, descricao, autor_id)
-        VALUES (?, 'status', 'Oficio criado e enviado', ?, ?)
-    ");
-    $stmtEvento->execute([$oficioId, "Oficio criado por {$nomeAutor} e enviado.", $usuarioId]);
+    if ($statusInicial === 'rascunho') {
+        registrarEvento($pdo, $oficioId, 'status', 'Rascunho salvo', 'Rascunho criado por ' . $autor['nome'] . '. Ainda nao enviado.', $usuarioId);
+    } else {
+        $anexosTexto = trim($dados['anexos'] ?? '');
+        registrarEvento($pdo, $oficioId, 'status', 'Oficio criado e enviado', "Oficio criado por {$autor['nome']} ({$autor['secretaria_sigla']}) e enviado.", $usuarioId);
+        if ($anexosTexto !== '') {
+            foreach (array_filter(array_map('trim', explode(',', $anexosTexto))) as $nomeArquivo) {
+                registrarEvento($pdo, $oficioId, 'anexo', 'Anexo adicionado', $nomeArquivo, $usuarioId);
+            }
+        }
+        // Notifica o setor destino (todos os usuarios ativos daquele setor)
+        $stmtUsuariosDestino = $pdo->prepare("SELECT id FROM usuarios_simulados WHERE setor_id = ? AND ativo = 1");
+        $stmtUsuariosDestino->execute([$dados['setor_destino_id']]);
+        foreach ($stmtUsuariosDestino->fetchAll(PDO::FETCH_COLUMN) as $destinatarioId) {
+            registrarNotificacao($pdo, $destinatarioId, $oficioId, "Nova demanda recebida: {$dados['assunto']}");
+        }
+    }
 
     $pdo->commit();
     echo json_encode(['sucesso' => true, 'dados' => ['id' => $oficioId]]);
