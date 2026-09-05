@@ -9,16 +9,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_id'])) {
     exit;
 }
 
-$stmt = $pdo->query("
-    SELECT u.id, u.nome, u.perfil, u.nivel_plus, s.nome AS setor_nome, sec.sigla AS secretaria_sigla
-    FROM usuarios_simulados u
-    JOIN setores s ON s.id = u.setor_id
-    JOIN departamentos d ON d.id = s.departamento_id
-    JOIN secretarias sec ON sec.id = d.secretaria_id
-    WHERE u.ativo = 1
-    ORDER BY sec.sigla, u.nome
-");
-$usuarios = $stmt->fetchAll();
+try {
+    $stmt = $pdo->query("
+        SELECT u.id, u.nome, u.perfil, u.nivel_plus, s.nome AS setor_nome, sec.sigla AS secretaria_sigla
+        FROM usuarios_simulados u
+        JOIN setores s ON s.id = u.setor_id
+        JOIN departamentos d ON d.id = s.departamento_id
+        JOIN secretarias sec ON sec.id = d.secretaria_id
+        WHERE u.ativo = 1
+        ORDER BY sec.sigla, u.nome
+    ");
+    $usuarios = $stmt->fetchAll();
+} catch (\Throwable $e) {
+    http_response_code(500);
+    echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>SIGOF - Erro</title></head><body style="font-family: sans-serif; padding: 40px; background:#fef2f2;">';
+    echo '<h1 style="color:#991b1b;">Erro ao carregar o SIGOF</h1>';
+    echo '<p>Nao foi possivel consultar o banco de dados. Verifique se o banco <code>sigof</code> foi importado (arquivo <code>database/schema.sql</code>) e se o MySQL esta rodando.</p>';
+    echo '<pre style="background:#fff; border:1px solid #fca5a5; padding:12px; border-radius:8px; white-space:pre-wrap;">' . htmlspecialchars($e->getMessage()) . '</pre>';
+    echo '</body></html>';
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
