@@ -27,6 +27,10 @@ if (!empty($_GET['tipo'])) {
     $parametros['tipo'] = $_GET['tipo'];
 }
 
+if (!empty($_GET['legado'])) {
+    $condicoes[] = 'o.origem_legado = 1';
+}
+
 $situacaoPrazo = $_GET['situacao_prazo'] ?? '';
 if ($situacaoPrazo === 'vencidas') {
     $condicoes[] = "o.prazo < CURDATE() AND o.status NOT IN ('concluida','cancelada')";
@@ -35,7 +39,7 @@ if ($situacaoPrazo === 'vencidas') {
 }
 
 $sql = "
-    SELECT o.id, o.numero_oficio, o.tipo, o.assunto, o.prioridade, o.urgencia, o.status,
+    SELECT o.id, o.numero_oficio, o.tipo, o.origem_legado, o.assunto, o.prioridade, o.urgencia, o.status,
            o.prazo, DATE_FORMAT(o.prazo, '%d/%m/%Y') AS prazo_formatado,
            sec_o.sigla AS origem_sigla, sec_d.sigla AS destino_sigla,
            r.nome AS responsavel_nome

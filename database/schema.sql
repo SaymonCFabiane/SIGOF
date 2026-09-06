@@ -63,6 +63,7 @@ CREATE TABLE oficios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero_oficio VARCHAR(50) NULL,
     tipo ENUM('solicitacao','solicitacao_informacao','solicitacao_documento','analise','providencia','encaminhamento','oficio','denuncia','outro') NOT NULL DEFAULT 'oficio',
+    origem_legado TINYINT(1) NOT NULL DEFAULT 0,
     confidencial TINYINT(1) NOT NULL DEFAULT 0,
     assunto VARCHAR(255) NOT NULL,
     descricao TEXT NULL,

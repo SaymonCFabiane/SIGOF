@@ -43,7 +43,7 @@
         container.innerHTML = `
             <div class="flex items-start justify-between mb-4 flex-wrap gap-2">
                 <div>
-                    <span class="text-[10px] uppercase tracking-wide text-slate-400">${LABELS_TIPO[oficio.tipo] || oficio.tipo}${oficio.confidencial == 1 ? ' &bull; CONFIDENCIAL' : ''}</span>
+                    <span class="text-[10px] uppercase tracking-wide text-slate-400">${LABELS_TIPO[oficio.tipo] || oficio.tipo}${oficio.confidencial == 1 ? ' &bull; CONFIDENCIAL' : ''}${oficio.origem_legado == 1 ? ' &bull; <span class="text-amber-600">LEGADO</span>' : ''}</span>
                     <h1 class="text-xl font-bold text-slate-800">${oficio.assunto}</h1>
                     <p class="text-xs text-slate-400">${oficio.numero_oficio ? `Oficio no ${oficio.numero_oficio} &bull; ` : ''}#${String(oficio.id).padStart(6, '0')} &bull; criado por ${oficio.criador_nome || 'Denunciante (identidade protegida)'}</p>
                 </div>
@@ -184,8 +184,8 @@
                 </div>
                 <div class="bg-white border rounded-lg p-4">
                     <h2 class="font-semibold text-sm mb-2">Anexar Documento</h2>
-                    <input id="input-anexo" type="text" class="w-full border rounded px-2 py-1 text-sm mb-2" placeholder="Nome do arquivo (ex: oficio_123.pdf)">
-                    <button id="btn-anexo" class="bg-slate-700 text-white text-xs px-3 py-2 rounded hover:bg-slate-800">Registrar anexo</button>
+                    <input id="input-anexo" type="file" class="w-full border rounded px-2 py-1 text-sm mb-2 text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-100 file:text-slate-700 file:text-xs">
+                    <button id="btn-anexo" class="bg-slate-700 text-white text-xs px-3 py-2 rounded hover:bg-slate-800">Anexar Documento</button>
                 </div>
             </div>
         `;
@@ -320,9 +320,12 @@
         const btnAnexo = document.getElementById('btn-anexo');
         if (btnAnexo) {
             btnAnexo.addEventListener('click', async () => {
-                const nomeArquivo = document.getElementById('input-anexo').value.trim();
-                if (!nomeArquivo) return;
-                return executarAcao('adicionar_anexo.php', { oficio_id: oficioId, nome_arquivo: nomeArquivo });
+                const inputAnexo = document.getElementById('input-anexo');
+                const arquivo = inputAnexo.files[0];
+                if (!arquivo) return;
+                const resultado = await executarAcao('adicionar_anexo.php', { oficio_id: oficioId, nome_arquivo: arquivo.name });
+                inputAnexo.value = '';
+                return resultado;
             });
         }
     }

@@ -30,8 +30,9 @@ if ($usuarioAtual) {
             <nav class="flex items-center gap-5 text-sm flex-wrap justify-end">
                 <a href="busca.php" class="flex items-center justify-center text-slate-600 hover:text-blue-700 transition-colors">Buscar</a>
                 <a href="dashboard.php" class="text-slate-600 hover:text-blue-700 transition-colors">Dashboard</a>
-                <a href="oficios.php" class="text-slate-600 hover:text-blue-700 transition-colors">Oficios</a>
                 <a href="novo_oficio.php" class="flex items-center justify-center text-slate-600 hover:text-blue-700 transition-colors">+ Novo Oficio</a>
+                <a href="oficios.php" class="text-slate-600 hover:text-blue-700 transition-colors">Oficios</a>
+                <a href="oficios_legados.php" class="text-slate-600 hover:text-blue-700 transition-colors">Oficios Legados</a>
                 <a href="notificacoes.php" class="relative text-slate-500 hover:text-blue-700 transition-colors" title="Notificacoes">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3a5 5 0 0 0-5 5v2.28c0 .69-.22 1.36-.63 1.92L5 14.5c-.6.8 0 1.94 1 1.94h12c1 0 1.6-1.14 1-1.94l-1.37-2.3a3.2 3.2 0 0 1-.63-1.92V8a5 5 0 0 0-5-5Z"></path>
