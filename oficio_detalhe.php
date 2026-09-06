@@ -8,6 +8,6 @@ $oficioId = (int) ($_GET['id'] ?? 0);
     <p class="text-slate-400 text-sm">Carregando...</p>
 </div>
 
-<script src="assets/js/api.js"></script>
-<script src="assets/js/oficio_detalhe.js"></script>
+<script src="assets/js/api.js?v=<?= @filemtime(__DIR__ . '/assets/js/api.js') ?>"></script>
+<script src="assets/js/oficio_detalhe.js?v=<?= @filemtime(__DIR__ . '/assets/js/oficio_detalhe.js') ?>"></script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

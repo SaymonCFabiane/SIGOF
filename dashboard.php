@@ -11,6 +11,6 @@ require_once __DIR__ . '/includes/header.php';
     <p class="text-slate-400 text-sm">Carregando indicadores...</p>
 </div>
 
-<script src="assets/js/api.js"></script>
-<script src="assets/js/dashboard.js"></script>
+<script src="assets/js/api.js?v=<?= @filemtime(__DIR__ . '/assets/js/api.js') ?>"></script>
+<script src="assets/js/dashboard.js?v=<?= @filemtime(__DIR__ . '/assets/js/dashboard.js') ?>"></script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

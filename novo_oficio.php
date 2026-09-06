@@ -103,6 +103,6 @@ $tipoPreSelecionado = $_GET['tipo'] ?? 'oficio';
 </form>
 </div>
 
-<script src="assets/js/api.js"></script>
-<script src="assets/js/novo_oficio.js"></script>
+<script src="assets/js/api.js?v=<?= @filemtime(__DIR__ . '/assets/js/api.js') ?>"></script>
+<script src="assets/js/novo_oficio.js?v=<?= @filemtime(__DIR__ . '/assets/js/novo_oficio.js') ?>"></script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

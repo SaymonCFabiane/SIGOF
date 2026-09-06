@@ -15,6 +15,6 @@ require_once __DIR__ . '/includes/header.php';
     <div id="resultados-busca" class="space-y-3"></div>
 </div>
 
-<script src="assets/js/api.js"></script>
-<script src="assets/js/busca.js"></script>
+<script src="assets/js/api.js?v=<?= @filemtime(__DIR__ . '/assets/js/api.js') ?>"></script>
+<script src="assets/js/busca.js?v=<?= @filemtime(__DIR__ . '/assets/js/busca.js') ?>"></script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -70,6 +70,6 @@ require_once __DIR__ . '/includes/header.php';
     <p class="text-slate-400 text-sm">Carregando oficios...</p>
 </div>
 
-<script src="assets/js/api.js"></script>
-<script src="assets/js/oficios.js"></script>
+<script src="assets/js/api.js?v=<?= @filemtime(__DIR__ . '/assets/js/api.js') ?>"></script>
+<script src="assets/js/oficios.js?v=<?= @filemtime(__DIR__ . '/assets/js/oficios.js') ?>"></script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -12,16 +12,26 @@ async function carregarNotificacoes() {
     }
 
     container.innerHTML = resposta.dados.map(n => `
-        <a href="${n.oficio_id ? 'oficio_detalhe.php?id=' + n.oficio_id : '#'}" class="block border rounded-lg p-3 ${n.lida ? 'bg-white' : 'bg-blue-50 border-blue-200'} hover:shadow-sm transition">
+        <a href="${n.oficio_id ? 'oficio_detalhe.php?id=' + n.oficio_id : '#'}" data-id="${n.id}" data-lida="${n.lida ? '1' : '0'}" class="block border rounded-lg p-3 ${n.lida ? 'bg-white' : 'bg-blue-50 border-blue-200'} hover:shadow-sm transition">
             <p class="text-sm ${n.lida ? 'text-slate-600' : 'text-slate-800 font-medium'}">${n.mensagem}</p>
             <p class="text-xs text-slate-400 mt-1">${new Date(n.criado_em.replace(' ', 'T')).toLocaleString('pt-BR')}${n.oficio_assunto ? ' &bull; ' + n.oficio_assunto : ''}</p>
         </a>
     `).join('');
 }
 
-document.getElementById('btn-marcar-todas').addEventListener('click', async () => {
-    await chamarApi('marcar_notificacao_lida.php', { todas: true }, 'POST');
-    carregarNotificacoes();
+document.getElementById('lista-notificacoes').addEventListener('click', async (evento) => {
+    const link = evento.target.closest('a[data-id]');
+    if (!link || link.dataset.lida !== '0') return;
+
+    evento.preventDefault();
+    await chamarApi('marcar_notificacao_lida.php', { id: Number(link.dataset.id) }, 'POST');
+
+    const destino = link.getAttribute('href');
+    if (destino && destino !== '#') {
+        window.location.href = destino;
+    } else {
+        carregarNotificacoes();
+    }
 });
 
 carregarNotificacoes();
