@@ -59,6 +59,46 @@ function registrarNotificacao(PDO $pdo, $usuarioId, $oficioId, $mensagem)
     $stmt->execute([$usuarioId, $oficioId, $mensagem]);
 }
 
+// Recalcula a fila de espera de um setor destino: ordena as demandas ativas por
+// urgencia (urgente primeiro) e depois por ordem de chegada (criado_em). Quando a
+// posicao de uma demanda piora (numero maior que antes), notifica quem enviou.
+function recalcularFilaSetor(PDO $pdo, $setorDestinoId, $motivo = 'mudanca na fila do setor')
+{
+    if (!$setorDestinoId) {
+        return;
+    }
+    $stmt = $pdo->prepare("
+        SELECT id, posicao_fila, assunto, criado_por_id
+        FROM oficios
+        WHERE setor_destino_id = ?
+          AND status NOT IN ('rascunho', 'concluida', 'cancelada')
+        ORDER BY (urgencia = 'urgente') DESC, criado_em ASC, id ASC
+    ");
+    $stmt->execute([$setorDestinoId]);
+    $fila = $stmt->fetchAll();
+
+    $posicao = 0;
+    foreach ($fila as $item) {
+        $posicao++;
+        $posicaoAnterior = $item['posicao_fila'] !== null ? (int) $item['posicao_fila'] : null;
+
+        if ($posicaoAnterior === $posicao) {
+            continue;
+        }
+
+        $pdo->prepare("UPDATE oficios SET posicao_fila = ? WHERE id = ?")->execute([$posicao, $item['id']]);
+
+        if ($posicaoAnterior !== null && $posicao > $posicaoAnterior) {
+            registrarNotificacao(
+                $pdo,
+                $item['criado_por_id'],
+                $item['id'],
+                "Sua demanda \"{$item['assunto']}\" caiu para o {$posicao}o lugar na fila. Motivo: {$motivo}."
+            );
+        }
+    }
+}
+
 // Feriados nacionais fixos (simplificado para o prototipo - pode ser expandido).
 function feriadosNacionais()
 {

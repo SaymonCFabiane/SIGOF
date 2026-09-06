@@ -5,16 +5,36 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/funcoes.php';
 
 $usuarioAtualId = usuarioAtualId();
+$autorAtual = carregarUsuarioAtual($pdo, $usuarioAtualId);
+$meuSetorId = $autorAtual['setor_id'] ?? 0;
 
 $condicoes = ["(o.status <> 'rascunho' OR o.criado_por_id = :usuario_atual)"];
 $parametros = ['usuario_atual' => $usuarioAtualId];
 
 $status = $_GET['status'] ?? '';
+$aba = $_GET['aba'] ?? '';
+
+$abasConcluidas = ['concluidos_recebidos', 'concluidos_solicitados'];
+$abasRecebidos = ['ativos_recebidos', 'concluidos_recebidos'];
+$abasSolicitados = ['ativos_solicitados', 'concluidos_solicitados'];
+
 if ($status !== '') {
     $condicoes[] = 'o.status = :status';
     $parametros['status'] = $status;
+} elseif (in_array($aba, $abasConcluidas, true)) {
+    $condicoes[] = "o.status IN ('concluida', 'cancelada')";
+} elseif (in_array($aba, ['ativos_recebidos', 'ativos_solicitados'], true)) {
+    $condicoes[] = "o.status NOT IN ('concluida', 'cancelada', 'rascunho')";
 } else {
     $condicoes[] = "o.status <> 'rascunho'";
+}
+
+if (in_array($aba, $abasRecebidos, true)) {
+    $condicoes[] = 'o.setor_destino_id = :meu_setor';
+    $parametros['meu_setor'] = $meuSetorId;
+} elseif (in_array($aba, $abasSolicitados, true)) {
+    $condicoes[] = 'o.setor_origem_id = :meu_setor';
+    $parametros['meu_setor'] = $meuSetorId;
 }
 
 if (!empty($_GET['prioridade'])) {
@@ -40,7 +60,7 @@ if ($situacaoPrazo === 'vencidas') {
 
 $sql = "
     SELECT o.id, o.numero_oficio, o.tipo, o.origem_legado, o.assunto, o.prioridade, o.urgencia, o.status,
-           o.prazo, DATE_FORMAT(o.prazo, '%d/%m/%Y') AS prazo_formatado,
+           o.posicao_fila, o.prazo, DATE_FORMAT(o.prazo, '%d/%m/%Y') AS prazo_formatado,
            sec_o.sigla AS origem_sigla, sec_d.sigla AS destino_sigla,
            r.nome AS responsavel_nome
     FROM oficios o
@@ -52,7 +72,7 @@ $sql = "
     JOIN secretarias sec_d ON sec_d.id = dd.secretaria_id
     LEFT JOIN usuarios_simulados r ON r.id = o.responsavel_atual_id
     WHERE " . implode(' AND ', $condicoes) . "
-    ORDER BY o.criado_em DESC
+    ORDER BY (o.posicao_fila IS NULL) ASC, o.posicao_fila ASC, o.criado_em DESC
 ";
 
 $stmt = $pdo->prepare($sql);

@@ -55,6 +55,7 @@
                 <div><span class="block text-slate-400 text-xs">Destino</span>${oficio.destino_sigla}</div>
                 <div><span class="block text-slate-400 text-xs">Responsavel</span>${oficio.responsavel_nome || '<em>a definir</em>'}</div>
                 <div><span class="block text-slate-400 text-xs">Prioridade / Urgencia</span>${oficio.prioridade} ${oficio.urgencia === 'urgente' ? '⚡' : ''}</div>
+                ${oficio.posicao_fila && !finalizado ? `<div><span class="block text-slate-400 text-xs">Posicao na fila</span><strong>${oficio.posicao_fila}o lugar</strong></div>` : ''}
                 <div><span class="block text-slate-400 text-xs">Prazo</span>${oficio.prazo_formatado}${oficio.prazo !== oficio.prazo_original ? ` <span class="text-slate-400">(original: ${oficio.prazo_original_formatado})</span>` : ''}</div>
                 ${oficio.prazo_resposta_formatado ? `<div><span class="block text-slate-400 text-xs">Prazo de resposta</span>${oficio.prazo_resposta_formatado}</div>` : ''}
                 ${colaboradores.length ? `<div class="col-span-2"><span class="block text-slate-400 text-xs">Colaboradores</span>${colaboradores.map(c => c.nome).join(', ')}</div>` : ''}
@@ -204,7 +205,8 @@
         if (['em_analise', 'em_andamento', 'aguardando_responsavel'].includes(status)) acoes.push(['solicitar_informacao', 'Solicitar informacao', 'bg-amber-600 hover:bg-amber-700']);
         if (status === 'aguardando_informacao') acoes.push(['responder_informacao', 'Informacao respondida', 'bg-purple-700 hover:bg-purple-800']);
         if (status === 'em_andamento') acoes.push(['enviar_validacao', 'Enviar para validacao', 'bg-amber-600 hover:bg-amber-700']);
-        if (['em_andamento', 'aguardando_validacao'].includes(status)) acoes.push(['concluir', 'Concluir', 'bg-green-700 hover:bg-green-800']);
+        const podeConcluir = permissoes.eh_responsavel || permissoes.eh_do_setor_destino || permissoes.eh_plus;
+        if (['recebida', 'em_andamento', 'aguardando_validacao'].includes(status) && podeConcluir) acoes.push(['concluir', 'Concluir', 'bg-green-700 hover:bg-green-800']);
         if (['recebida', 'em_analise', 'em_andamento', 'aguardando_responsavel', 'aguardando_informacao', 'aguardando_validacao'].includes(status)) acoes.push(['devolver', 'Devolver', 'bg-red-700 hover:bg-red-800']);
         if (!['concluida', 'cancelada'].includes(status)) acoes.push(['cancelar', 'Cancelar', 'bg-slate-600 hover:bg-slate-700']);
         if (['concluida', 'cancelada'].includes(status) && permissoes.eh_demandante) acoes.push(['reabrir', 'Reabrir', 'bg-orange-600 hover:bg-orange-700']);

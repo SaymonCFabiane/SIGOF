@@ -85,6 +85,9 @@ if ($acao === 'encaminhar') {
             registrarNotificacao($pdo, $destinatarioId, $oficioId, "Demanda encaminhada para o seu setor: {$oficio['assunto']}");
         }
 
+        recalcularFilaSetor($pdo, $oficio['setor_destino_id'], "a demanda \"{$oficio['assunto']}\" foi encaminhada para outro setor e saiu da fila");
+        recalcularFilaSetor($pdo, $novoSetorDestinoId, "a demanda \"{$oficio['assunto']}\" foi encaminhada e entrou na fila deste setor");
+
         $pdo->commit();
         echo json_encode(['sucesso' => true]);
     } catch (Exception $e) {
@@ -115,6 +118,7 @@ if ($acao === 'cancelar') {
     try {
         finalizarAcao($pdo, $oficioId, 'cancelada', 'Oficio cancelado', "Cancelado por {$autor['nome']}.", $usuarioId, $justificativa);
         registrarNotificacao($pdo, $oficio['criado_por_id'], $oficioId, "Demanda \"{$oficio['assunto']}\" foi cancelada.");
+        recalcularFilaSetor($pdo, $oficio['setor_destino_id'], "a demanda \"{$oficio['assunto']}\" foi cancelada e saiu da fila");
         $pdo->commit();
         echo json_encode(['sucesso' => true]);
     } catch (Exception $e) {
@@ -145,6 +149,7 @@ if ($acao === 'reabrir') {
     try {
         finalizarAcao($pdo, $oficioId, 'reaberta', 'Oficio reaberto', "Reaberto por {$autor['nome']}.", $usuarioId, $justificativa);
         registrarNotificacao($pdo, $oficio['responsavel_atual_id'], $oficioId, "Demanda \"{$oficio['assunto']}\" foi reaberta pelo demandante.");
+        recalcularFilaSetor($pdo, $oficio['setor_destino_id'], "a demanda \"{$oficio['assunto']}\" foi reaberta e voltou para a fila");
         $pdo->commit();
         echo json_encode(['sucesso' => true]);
     } catch (Exception $e) {
@@ -158,8 +163,12 @@ if ($acao === 'reabrir') {
 // Conclusao (8.3): exige resposta final
 // ---------------------------------------------------------------
 if ($acao === 'concluir') {
-    if (!in_array($oficio['status'], ['em_andamento', 'aguardando_validacao'], true)) {
+    if (!in_array($oficio['status'], ['recebida', 'em_andamento', 'aguardando_validacao'], true)) {
         echo json_encode(['sucesso' => false, 'mensagem' => "Nao e possivel concluir a partir do status atual ({$oficio['status']})."]);
+        exit;
+    }
+    if (!$ehResponsavel && !$ehPlus && !$ehDoSetorDestino) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Somente quem recebeu a demanda pode conclui-la.']);
         exit;
     }
     $respostaFinal = trim($dados['resposta_final'] ?? '');
@@ -172,6 +181,7 @@ if ($acao === 'concluir') {
     try {
         finalizarAcao($pdo, $oficioId, 'concluida', 'Oficio concluido', "Concluido por {$autor['nome']}. Resposta: {$respostaFinal}", $usuarioId, null, ['resposta_final' => $respostaFinal]);
         registrarNotificacao($pdo, $oficio['criado_por_id'], $oficioId, "Demanda \"{$oficio['assunto']}\" foi concluida.");
+        recalcularFilaSetor($pdo, $oficio['setor_destino_id'], "a demanda \"{$oficio['assunto']}\" foi concluida e saiu da fila");
         $pdo->commit();
         echo json_encode(['sucesso' => true]);
     } catch (Exception $e) {
@@ -207,6 +217,10 @@ if ($acao === 'receber') {
         $descricao = "Recebido por {$autor['nome']}. Classificado como prioridade {$prioridade}" . ($urgencia === 'urgente' ? ', urgente.' : '.');
         registrarEvento($pdo, $oficioId, 'status', 'Oficio recebido e classificado', $descricao, $usuarioId, 'status', 'enviada', 'recebida');
         registrarNotificacao($pdo, $oficio['criado_por_id'], $oficioId, "Demanda \"{$oficio['assunto']}\" foi recebida e classificada.");
+        $motivoFila = $urgencia === 'urgente'
+            ? "a demanda \"{$oficio['assunto']}\" foi classificada como urgente e passou na frente"
+            : "mudanca na fila do setor";
+        recalcularFilaSetor($pdo, $oficio['setor_destino_id'], $motivoFila);
         $pdo->commit();
         echo json_encode(['sucesso' => true]);
     } catch (Exception $e) {

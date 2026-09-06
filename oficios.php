@@ -9,24 +9,17 @@ require_once __DIR__ . '/includes/header.php';
     <a href="novo_oficio.php" class="bg-blue-700 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-800">+ Nova Demanda</a>
 </div>
 
+<div class="flex gap-1 mb-4 border-b border-slate-200 flex-wrap">
+    <button type="button" data-aba="ativos_recebidos" class="aba-oficios px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">Ativos Recebidos</button>
+    <button type="button" data-aba="ativos_solicitados" class="aba-oficios px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">Ativos Solicitados</button>
+    <button type="button" data-aba="concluidos_recebidos" class="aba-oficios px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">Concluidos Recebidos</button>
+    <button type="button" data-aba="concluidos_solicitados" class="aba-oficios px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">Concluidos Solicitados</button>
+</div>
+
 <div class="bg-white border rounded-lg p-4 mb-6 grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
     <div>
         <label class="block text-xs text-slate-500 mb-1">Status</label>
-        <select id="filtro-status" class="w-full border rounded px-2 py-1">
-            <option value="">Todos (exceto rascunho)</option>
-            <option value="rascunho">Meus rascunhos</option>
-            <option value="enviada">Enviada</option>
-            <option value="recebida">Recebida</option>
-            <option value="aguardando_responsavel">Aguardando Responsavel</option>
-            <option value="em_analise">Em Analise</option>
-            <option value="em_andamento">Em Andamento</option>
-            <option value="aguardando_informacao">Aguardando Informacao</option>
-            <option value="aguardando_validacao">Aguardando Validacao</option>
-            <option value="devolvida">Devolvida</option>
-            <option value="concluida">Concluida</option>
-            <option value="cancelada">Cancelada</option>
-            <option value="reaberta">Reaberta</option>
-        </select>
+        <select id="filtro-status" class="w-full border rounded px-2 py-1"></select>
     </div>
     <div>
         <label class="block text-xs text-slate-500 mb-1">Prioridade</label>

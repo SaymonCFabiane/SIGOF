@@ -57,6 +57,7 @@ try {
         $usuarioId
     );
     registrarEvento($pdo, $oficioId, 'anexo', 'Anexo adicionado', $dados['nome_arquivo'], $usuarioId);
+    recalcularFilaSetor($pdo, $dados['setor_destino_id']);
 
     $pdo->commit();
     echo json_encode(['sucesso' => true, 'dados' => ['id' => $oficioId]]);

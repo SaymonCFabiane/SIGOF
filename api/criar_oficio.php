@@ -78,6 +78,7 @@ try {
         foreach ($stmtUsuariosDestino->fetchAll(PDO::FETCH_COLUMN) as $destinatarioId) {
             registrarNotificacao($pdo, $destinatarioId, $oficioId, "Nova demanda recebida: {$dados['assunto']}");
         }
+        recalcularFilaSetor($pdo, $dados['setor_destino_id']);
     }
 
     $pdo->commit();

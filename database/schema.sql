@@ -73,6 +73,7 @@ CREATE TABLE oficios (
     responsavel_atual_id INT NULL,
     prioridade ENUM('baixa','normal','alta','critica') NOT NULL DEFAULT 'normal',
     urgencia ENUM('urgente','nao_urgente') NOT NULL DEFAULT 'nao_urgente',
+    posicao_fila INT NULL,
     prazo_original DATE NOT NULL,
     prazo DATE NOT NULL,
     prazo_resposta DATE NULL,
