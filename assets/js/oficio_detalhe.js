@@ -55,7 +55,7 @@
                 <div><span class="block text-slate-400 text-xs">Destino</span>${oficio.destino_sigla}</div>
                 <div><span class="block text-slate-400 text-xs">Responsavel</span>${oficio.responsavel_nome || '<em>a definir</em>'}</div>
                 <div><span class="block text-slate-400 text-xs">Prioridade / Urgencia</span>${oficio.prioridade} ${oficio.urgencia === 'urgente' ? '⚡' : ''}</div>
-                ${oficio.posicao_fila && !finalizado ? `<div><span class="block text-slate-400 text-xs">Posicao na fila</span><strong>${oficio.posicao_fila}o lugar</strong></div>` : ''}
+                ${oficio.posicao_fila && !finalizado ? `<div><span class="block text-slate-400 text-xs">Posicao na fila</span><strong>${oficio.posicao_fila}&ordm; lugar</strong></div>` : ''}
                 <div><span class="block text-slate-400 text-xs">Prazo</span>${oficio.prazo_formatado}${oficio.prazo !== oficio.prazo_original ? ` <span class="text-slate-400">(original: ${oficio.prazo_original_formatado})</span>` : ''}</div>
                 ${oficio.prazo_resposta_formatado ? `<div><span class="block text-slate-400 text-xs">Prazo de resposta</span>${oficio.prazo_resposta_formatado}</div>` : ''}
                 ${colaboradores.length ? `<div class="col-span-2"><span class="block text-slate-400 text-xs">Colaboradores</span>${colaboradores.map(c => c.nome).join(', ')}</div>` : ''}

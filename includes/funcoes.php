@@ -93,7 +93,7 @@ function recalcularFilaSetor(PDO $pdo, $setorDestinoId, $motivo = 'mudanca na fi
                 $pdo,
                 $item['criado_por_id'],
                 $item['id'],
-                "Sua demanda \"{$item['assunto']}\" caiu para o {$posicao}o lugar na fila. Motivo: {$motivo}."
+                "Sua demanda \"{$item['assunto']}\" caiu para o {$posicao}&ordm; lugar na fila. Motivo: {$motivo}."
             );
         }
     }

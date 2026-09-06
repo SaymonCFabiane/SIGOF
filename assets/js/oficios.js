@@ -66,27 +66,37 @@ async function carregarOficios() {
         return;
     }
 
-    container.innerHTML = resposta.dados.map(o => `
-        <a href="oficio_detalhe.php?id=${o.id}" class="block bg-white border rounded-lg p-4 hover:shadow-md transition ${o.atrasada ? 'border-red-300' : ''}">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                    <span class="text-[10px] uppercase tracking-wide text-slate-400">${LABELS_TIPO[o.tipo] || o.tipo}${o.origem_legado == 1 ? ' &bull; <span class="text-amber-600">LEGADO</span>' : ''}</span>
-                    <span class="font-semibold text-slate-800 block">${o.assunto}</span>
-                    ${o.numero_oficio ? `<span class="text-xs text-slate-400">Oficio no ${o.numero_oficio}</span>` : ''}
+    container.innerHTML = resposta.dados.map(o => {
+        const emFila = o.posicao_fila && !['concluida', 'cancelada'].includes(o.status);
+        const destacarFila = abaAtual === 'ativos_recebidos' && emFila;
+        return `
+        <a href="oficio_detalhe.php?id=${o.id}" class="flex items-center gap-4 bg-white border rounded-lg p-4 hover:shadow-md transition ${o.atrasada ? 'border-red-300' : ''}">
+            ${destacarFila ? `
+            <div class="shrink-0 flex items-center justify-center w-10 text-2xl font-bold text-slate-700" title="Posicao na fila de recebimento">
+                ${o.posicao_fila}&ordm;
+            </div>` : ''}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wide text-slate-400">${LABELS_TIPO[o.tipo] || o.tipo}${o.origem_legado == 1 ? ' &bull; <span class="text-amber-600">LEGADO</span>' : ''}</span>
+                        <span class="font-semibold text-slate-800 block">${o.assunto}</span>
+                        ${o.numero_oficio ? `<span class="text-xs text-slate-400">Oficio no ${o.numero_oficio}</span>` : ''}
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full font-medium ${CORES_STATUS[o.status] || 'bg-slate-100'}">${LABELS_STATUS[o.status] || o.status}</span>
                 </div>
-                <span class="text-xs px-2 py-1 rounded-full font-medium ${CORES_STATUS[o.status] || 'bg-slate-100'}">${LABELS_STATUS[o.status] || o.status}</span>
-            </div>
-            <div class="flex items-center gap-4 mt-2 text-xs text-slate-500 flex-wrap">
-                <span>${o.origem_sigla} &rarr; ${o.destino_sigla}</span>
-                <span>Responsavel: ${o.responsavel_nome || '<em>a definir</em>'}</span>
-                <span class="${o.atrasada ? 'text-red-600 font-semibold' : ''}">
-                    Prazo: ${o.prazo_formatado}${o.atrasada ? ` (atrasada ha ${o.dias_atraso} dia(s) util(eis))` : ''}
-                </span>
-                <span class="uppercase font-semibold ${corPrioridade(o.prioridade)}">${o.prioridade}${o.urgencia === 'urgente' ? ' &bull; urgente' : ''}</span>
-                ${o.posicao_fila && !['concluida', 'cancelada'].includes(o.status) ? `<span class="font-semibold text-indigo-700">Fila: ${o.posicao_fila}o lugar</span>` : ''}
+                <div class="flex items-center gap-4 mt-2 text-xs text-slate-500 flex-wrap">
+                    <span>${o.origem_sigla} &rarr; ${o.destino_sigla}</span>
+                    <span>Responsavel: ${o.responsavel_nome || '<em>a definir</em>'}</span>
+                    <span class="${o.atrasada ? 'text-red-600 font-semibold' : ''}">
+                        Prazo: ${o.prazo_formatado}${o.atrasada ? ` (atrasada ha ${o.dias_atraso} dia(s) util(eis))` : ''}
+                    </span>
+                    <span class="uppercase font-semibold ${corPrioridade(o.prioridade)}">${o.prioridade}${o.urgencia === 'urgente' ? ' &bull; urgente' : ''}</span>
+                    ${!destacarFila && emFila ? `<span class="font-semibold text-indigo-700">Fila: ${o.posicao_fila}&ordm; lugar</span>` : ''}
+                </div>
             </div>
         </a>
-    `).join('');
+        `;
+    }).join('');
 }
 
 document.querySelectorAll('.aba-oficios').forEach(btn => {
